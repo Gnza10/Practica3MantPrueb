@@ -15,3 +15,5 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+p3/src/.DS_Store
+p3/src/main/.DS_Store
