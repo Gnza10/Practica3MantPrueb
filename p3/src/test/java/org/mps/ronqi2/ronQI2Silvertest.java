@@ -1,5 +1,6 @@
 package org.mps.ronqi2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -66,6 +67,52 @@ public class RonQI2SilverTest {
      * Un inicializar debe configurar ambos sensores, comprueba que cuando se inicializa de forma correcta (el conectar es true), 
      * se llama una sola vez al configurar de cada sensor.
      */
+
+    @Test
+    @DisplayName("Test de obtener nueva lectura")
+    public void test_ObtenerNuevaLectura_Devuelvetrue() {
+        DispositivoSilver d = mock(DispositivoSilver.class);
+        when(d.leerSensorPresion()).thenReturn(60.0f);
+        when(d.leerSensorSonido()).thenReturn(80.0f);
+        ronQI2Silver.anyadirDispositivo(d);
+
+        ronQI2Silver.obtenerNuevaLectura();
+        boolean resultado = ronQI2Silver.evaluarApneaSuenyo();
+
+        assertTrue(resultado);
+    }
+
+    @Test
+    @DisplayName("Test de obtener lecturas cuando ya hay cinco")
+    public void test_ObtenerNuevaLectura_CuandoYaHayCinco_DevuelveTrue() {
+        DispositivoSilver d = mock(DispositivoSilver.class);
+        when(d.leerSensorPresion()).thenReturn(10.0f);
+        when(d.leerSensorSonido()).thenReturn(20.0f);
+
+        ronQI2Silver.anyadirDispositivo(d);
+
+        for (int i = 0; i < 5; i++) {
+            ronQI2Silver.obtenerNuevaLectura();
+        }
+
+        when(d.leerSensorPresion()).thenReturn(8000.0f);
+        when(d.leerSensorSonido()).thenReturn(10000.0f);
+        ronQI2Silver.obtenerNuevaLectura();
+        boolean resultado = ronQI2Silver.evaluarApneaSuenyo();
+
+        assertTrue(resultado);       
+    }
+
+    @Test
+    @DisplayName("Test de añañdir dispositivo")
+    public void testAnyadirDispositivo() {
+        DispositivoSilver d = mock(DispositivoSilver.class);
+        ronQI2Silver.anyadirDispositivo(d);
+
+        assertEquals(d, ronQI2Silver.disp);
+    }
+
+    
 
     /*
      * Un reconectar, comprueba si el dispositivo desconectado, en ese caso, conecta ambos y devuelve true si ambos han sido conectados. 
