@@ -1,3 +1,4 @@
+//Practica hecha por Gonzalo Muñoz Rubio y David Molina Lopez
 package org.mps.ronqi2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -104,7 +105,7 @@ public class RonQI2SilverTest {
     }
 
     @Test
-    @DisplayName("Test de añañdir dispositivo")
+    @DisplayName("Test de añadir dispositivo")
     public void testAnyadirDispositivo() {
         DispositivoSilver d = mock(DispositivoSilver.class);
         ronQI2Silver.anyadirDispositivo(d);
@@ -119,6 +120,46 @@ public class RonQI2SilverTest {
      * Genera las pruebas que estimes oportunas para comprobar su correcto funcionamiento. 
      * Centrate en probar si todo va bien, o si no, y si se llama a los métodos que deben ser llamados.
      */
+
+     @ParameterizedTest
+     @CsvSource(
+         {"false",
+         "true"
+        }
+     )
+      @DisplayName("Test de comprobacion conexion dispositivo")
+      public void testEstaConectadoDispositivo(boolean estaConectado) {
+          DispositivoSilver d = mock(DispositivoSilver.class);
+          when(d.estaConectado()).thenReturn(estaConectado);
+          boolean expectedValue = estaConectado;
+ 
+          ronQI2Silver.anyadirDispositivo(d);
+          boolean actualValue = ronQI2Silver.estaConectado();
+  
+          assertEquals(expectedValue, actualValue);
+      }
+
+    @ParameterizedTest
+    @CsvSource(
+        {"false, true, true, true",
+        "true, true, true, false",
+        "false, true, false, false",
+        "false, true, false, false",
+        "false, false, false, false"
+    }
+    )
+     @DisplayName("Test de reconectar dispositivo")
+     public void testReconectarDispositivo(boolean estaConectado, boolean conectadoPresion, boolean conectadoSonido, boolean expectedValue) {
+         DispositivoSilver d = mock(DispositivoSilver.class);
+         when(d.estaConectado()).thenReturn(estaConectado);
+         when(d.conectarSensorPresion()).thenReturn(conectadoPresion);
+         when(d.conectarSensorSonido()).thenReturn(conectadoSonido);
+
+         ronQI2Silver.anyadirDispositivo(d);
+         boolean actualValue = ronQI2Silver.reconectar();
+ 
+         assertEquals(expectedValue, actualValue);
+     }
     
     /*
      * El método evaluarApneaSuenyo, evalua las últimas 5 lecturas realizadas con obtenerNuevaLectura(), 
@@ -130,4 +171,32 @@ public class RonQI2SilverTest {
      * Usa el ParameterizedTest para realizar un número de lecturas previas a calcular si hay apnea o no (por ejemplo 4, 5 y 10 lecturas).
      * https://junit.org/junit5/docs/current/user-guide/index.html#writing-tests-parameterized-tests
      */
+
+     
+     @ParameterizedTest
+     @CsvSource(
+         {"3, 8000.0f, 5.0f, false",
+         "4, 5.0f, 10000.0f, false",
+         "9, 5.0f, 5.0f, false"
+        }
+     )
+    @DisplayName("Test de evaluar apnea con 4, 5 y 10 lecturas")
+    public void test_EvaluarApnea_ConDistintasLecturas_DevuelveSiHayApnea(int iteracion, float valorPresion, float valorSonido, boolean expectedValue) {
+        DispositivoSilver d = mock(DispositivoSilver.class);
+        when(d.leerSensorPresion()).thenReturn(5.0f);
+        when(d.leerSensorSonido()).thenReturn(5.0f);
+
+        ronQI2Silver.anyadirDispositivo(d);
+
+        for (int i = 0; i < iteracion; i++) {
+            ronQI2Silver.obtenerNuevaLectura();
+        }
+
+        when(d.leerSensorPresion()).thenReturn(valorPresion);
+        when(d.leerSensorSonido()).thenReturn(valorSonido);
+        ronQI2Silver.obtenerNuevaLectura();
+        boolean actualValue = ronQI2Silver.evaluarApneaSuenyo();
+
+        assertEquals(expectedValue, actualValue);       
+    }
 }

@@ -1,3 +1,4 @@
+//Practica hecha por Gonzalo Muñoz Rubio y David Molina Lopez
 package org.mps.ronqi2;
 
 import java.util.ArrayList;
@@ -53,9 +54,11 @@ public class RonQI2Silver extends RonQI2{
                 .average()
                 .orElse(0.0);
         
-        if (avgP>=thresholdP && avgS > thresholdS){
-            //Hemos intercambiado el true por el false para que se ajuste a la descripción
-            //de la función, ya que antes estaban al revés
+        if (avgP>=thresholdP && avgS >= thresholdS){ 
+            //Modificado de (avgS > thresholdS) a (avgS >= thresholdS),
+            //para que tambien ocurra cuando el sonido es igual al umbral.
+            //Además hemos intercambiado el true por el false para que se ajuste a la descripción
+            //de la función, ya que antes estaban al revés.
             resultado = true;
         }   
         else{

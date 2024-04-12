@@ -1,3 +1,4 @@
+//Practica hecha por Gonzalo Muñoz Rubio y David Molina Lopez
 package org.mps.ronqi2;
 
 import org.mps.dispositivo.Dispositivo;

@@ -1,3 +1,4 @@
+//Practica hecha por Gonzalo Muñoz Rubio y David Molina Lopez
 package org.mps.dispositivo;
 
 public abstract class Dispositivo {
