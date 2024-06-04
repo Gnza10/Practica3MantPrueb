@@ -1,9 +1,26 @@
 package org.mps.ronqi2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class ronQI2Silvertest {
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mps.dispositivo.DispositivoSilver;
 
-    
+public class RonQI2SilverTest {
+
+    RonQI2Silver ronQI2Silver;
+
+    @BeforeEach
+    public void setUp() {
+        ronQI2Silver = new RonQI2Silver();
+    }
     /*
      * Analiza con los caminos base qué pruebas se han de realizar para comprobar que al inicializar funciona como debe ser. 
      * El funcionamiento correcto es que si es posible conectar ambos sensores y configurarlos, 
@@ -11,10 +28,91 @@ public class ronQI2Silvertest {
      * debería devolver true. En cualquier otro caso false. Se deja programado un ejemplo.
      */
     
+    
+    @Test
+    @DisplayName("Test de inicializar")
+    public void testInicializar_SensoresFuncionan_DevuelveTrue() {
+        DispositivoSilver d = mock(DispositivoSilver.class);
+        when(d.conectarSensorPresion()).thenReturn(true);
+        when(d.configurarSensorPresion()).thenReturn(true);
+        when(d.conectarSensorSonido()).thenReturn(true);
+        when(d.configurarSensorSonido()).thenReturn(true);
+
+        ronQI2Silver.anyadirDispositivo(d);
+
+        assertTrue(ronQI2Silver.inicializar());
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {"true, true, true, false",
+        "true, true, false, true",
+        "true, false, true, true",
+        "false, true, true, true"}
+    )
+    @DisplayName("Test de inicializar cuando falla algo en el proceso de conexión o configuración de los sensores")
+    public void testInicializar_SensoresNoFuncionan_DevuelveFalso(boolean conectarPresion, boolean configurarPresion, boolean conectarSonido, boolean configurarSonido) {
+        DispositivoSilver d = mock(DispositivoSilver.class);
+        when(d.conectarSensorPresion()).thenReturn(conectarPresion);
+        when(d.configurarSensorPresion()).thenReturn(configurarPresion);
+        when(d.conectarSensorSonido()).thenReturn(conectarSonido);
+        when(d.configurarSensorSonido()).thenReturn(configurarSonido);
+
+        ronQI2Silver.anyadirDispositivo(d);
+
+        assertFalse(ronQI2Silver.inicializar());
+    }
+    
     /*
      * Un inicializar debe configurar ambos sensores, comprueba que cuando se inicializa de forma correcta (el conectar es true), 
      * se llama una sola vez al configurar de cada sensor.
      */
+
+    @Test
+    @DisplayName("Test de obtener nueva lectura")
+    public void test_ObtenerNuevaLectura_Devuelvetrue() {
+        DispositivoSilver d = mock(DispositivoSilver.class);
+        when(d.leerSensorPresion()).thenReturn(60.0f);
+        when(d.leerSensorSonido()).thenReturn(80.0f);
+        ronQI2Silver.anyadirDispositivo(d);
+
+        ronQI2Silver.obtenerNuevaLectura();
+        boolean resultado = ronQI2Silver.evaluarApneaSuenyo();
+
+        assertTrue(resultado);
+    }
+
+    @Test
+    @DisplayName("Test de obtener lecturas cuando ya hay cinco")
+    public void test_ObtenerNuevaLectura_CuandoYaHayCinco_DevuelveTrue() {
+        DispositivoSilver d = mock(DispositivoSilver.class);
+        when(d.leerSensorPresion()).thenReturn(10.0f);
+        when(d.leerSensorSonido()).thenReturn(20.0f);
+
+        ronQI2Silver.anyadirDispositivo(d);
+
+        for (int i = 0; i < 5; i++) {
+            ronQI2Silver.obtenerNuevaLectura();
+        }
+
+        when(d.leerSensorPresion()).thenReturn(8000.0f);
+        when(d.leerSensorSonido()).thenReturn(10000.0f);
+        ronQI2Silver.obtenerNuevaLectura();
+        boolean resultado = ronQI2Silver.evaluarApneaSuenyo();
+
+        assertTrue(resultado);       
+    }
+
+    @Test
+    @DisplayName("Test de añañdir dispositivo")
+    public void testAnyadirDispositivo() {
+        DispositivoSilver d = mock(DispositivoSilver.class);
+        ronQI2Silver.anyadirDispositivo(d);
+
+        assertEquals(d, ronQI2Silver.disp);
+    }
+
+    
 
     /*
      * Un reconectar, comprueba si el dispositivo desconectado, en ese caso, conecta ambos y devuelve true si ambos han sido conectados. 
